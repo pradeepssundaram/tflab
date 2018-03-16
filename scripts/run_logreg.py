@@ -56,7 +56,7 @@ def PrepareData():
     
 
 # Parameters
-steps = 1000
+steps = 5000
 learning_rate = 0.001
 train_x,train_y,n_samples,n_features,n_classes=PrepareData()
 
@@ -70,25 +70,12 @@ rng.seed(1234)
 
 # Training Data
 
-#y = tf.placeholder(tf.float32,shape=[None,n_classes])
-#x = tf.placeholder(tf.float32,shape=[None,n_features])
-#
-#W = tf.Variable(tf.zeros([n_features,n_classes]))
-#b = tf.Variable(tf.zeros([n_classes]))
-
-
-# declaring model a.k.a. op
-
-
-#pred = tf.nn.softmax(tf.matmul(x,W,name="matmulp")+b)
-
-#cost = tf.reduce_mean(-tf.reduce_sum(y*tf.log(pred+1e-8),reduction_indices=1))
 
 opts = [
     tf.train.GradientDescentOptimizer(learning_rate=learning_rate),
-    ASGradientDescentOptimizer(base_learning_rate=learning_rate,scale=1.001),
+    ASGradientDescentOptimizer(base_learning_rate=learning_rate,scale=1.0001),
     tf.train.RMSPropOptimizer(learning_rate=learning_rate),
-    ASRMSPropOptimizer(base_learning_rate=learning_rate,scale=1.001),
+    ASRMSPropOptimizer(base_learning_rate=learning_rate,scale=1.0001),
     tf.train.AdamOptimizer(learning_rate=learning_rate),
     tf.train.MomentumOptimizer(learning_rate=learning_rate, momentum=.9),
     tf.train.MomentumOptimizer(learning_rate=learning_rate, momentum=.9, use_nesterov=True),
@@ -117,6 +104,6 @@ with tf.Session() as sess:
 
 plt.clf()
 for loss, opt_name in zip(losses, opt_names):
-    plt.plot(loss[::5], '+-', alpha=.5, label=opt_name)
+    plt.plot(loss[::1500], '+-', alpha=.5, label=opt_name)
 plt.legend()
-plt.savefig("D:\\BecomingADS\\tflab\\Plots\\new_lr_comparison.png")
+#plt.savefig("D:\\BecomingADS\\tflab\\Plots\\new_lr_comparison.png")

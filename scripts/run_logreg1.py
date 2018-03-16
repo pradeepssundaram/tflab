@@ -19,8 +19,8 @@ from os import path
 #sys.path.append("D:\\BecomingADS\\tflab\\tflab")
 libpath="../tflab/tflab"
 if (libpath not in sys.path):
-    sys.path.append("../tflab/tflab")
-
+    sys.path.append("./tflab/tflab")
+#sys.path.append('/media/admin1/60221789221762F8/tflab/tflab/')
 #from network import FeedForwardRegression
 from  optimizers import ASGradientDescentOptimizer, ASRMSPropOptimizer
 
@@ -83,10 +83,10 @@ with tf.Session() as sess:
                 x_minibatch,y_minibatch= mnist.train.next_batch(batch_size)
                 _,c=sess.run([optimizer,cost],feed_dict={x:x_minibatch ,y:y_minibatch})
                 avgcost+= c/batch_size
-                
+#                templ.append(c)
             
             if (epoch+1) % display_step == 0:
-                print("Epoch:", '%04d' % (epoch+1), "cost=", "{:.9f}".format(avgcost))
+                print("Epoch:", '%04d' % (epoch+1), "cost=", "{:.9f}".format(c))
             templ.append(avgcost)
         losses.append(templ)
     
@@ -99,8 +99,7 @@ for loss, opt_name in zip(losses, opt_names):
 plt.legend()
 
 
-plt.savefig("D:/BecomingADS/tflab/plots/logreg_comparison_all_27.png")
-#plt.savefig("../tflab/plots/logreg_comparison_dynamic.png")
+plt.savefig("../../tflab/plots/logreg_comparison_dynamic.jpg")
 
 
 
