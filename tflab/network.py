@@ -79,9 +79,11 @@ class FeedForwardRegression(FeedForward):
             batch_X = X[i_batch:i_batch + minibatch_size]
             batch_Y = Y[i_batch:i_batch + minibatch_size]
             train_val, loss_val = sess.run([train_, loss_], feed_dict={X_: batch_X, Y_: batch_Y})
+#            avgcost+= loss_val/minibatch_size
             losses.append(loss_val)
             if step % 500 == 0:
                 print("Step {} of {}, mse {}".format(step, steps, loss_val))
+#            losses.append(avgcost)
         return losses
 
 

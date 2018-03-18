@@ -5,6 +5,7 @@ Created on Thu Mar 15 21:10:34 2018
 @author: psundara
 """
 
+
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
 import matplotlib as mpl
@@ -92,7 +93,7 @@ optimizer = tf.train.GradientDescentOptimizer(learning_late).minimize(cost1)
 
 init1=tf.global_variables_initializer()
 
-with tf.Session() as sess1 :
+with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as sess1 :
     sess1.run(init1)
     
     for epoch in range(num_of_epochs):

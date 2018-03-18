@@ -14,10 +14,10 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 import sys
 from os import path
-
-libpath="../tflab/tflab"
+sys.path.append('/media/admin1/60221789221762F8/tflab/tflab')
+libpath="./tflab/tflab"
 if (libpath not in sys.path):
-    sys.path.append("../tflab/tflab")
+    sys.path.append("./tflab/tflab")
 
 try:
     

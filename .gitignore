@@ -7,3 +7,4 @@ build
 *.so
 *.egg-info
 bin
+.spyproject
