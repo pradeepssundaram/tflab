@@ -6,22 +6,18 @@ Created on Thu Mar 15 21:10:34 2018
 """
 
 import tensorflow as tf
-import numpy as np
-import pandas as pd
 from tensorflow.examples.tutorials.mnist import input_data
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 mpl.use('Agg')
 import sys
-from os import path
 
 
-#sys.path.append("D:\\BecomingADS\\tflab\\tflab")
-libpath="../tflab/tflab"
+sys.path.append("/media/admin1/60221789221762F8/tflab/tflab")
+libpath="./tflab/tflab"
 if (libpath not in sys.path):
-    sys.path.append("../tflab/tflab")
+    sys.path.append("./tflab/tflab")
 
-from network import FeedForwardRegression
 from  optimizers import ASGradientDescentOptimizer, ASRMSPropOptimizer
 
 
@@ -49,17 +45,14 @@ b = tf.Variable(tf.zeros([10]))
 pred = tf.nn.softmax(tf.matmul(x,W)+b)
 
 cost = tf.reduce_mean(-tf.reduce_sum(y*tf.log(pred+1e-8),reduction_indices=1))
-#optimizer = tf.train.GradientDescentOptimizer(learning_late).minimize(cost)
 optimizer = ASGradientDescentOptimizer(learning_late,scale=1.0001).minimize(cost)
-#optimizer = ASRMSPropOptimizer(learning_late).minimize(cost)
 # declaring initializing variables op
-
 init=tf.global_variables_initializer()
 
 losses=[]
 ASG_Losses=[]
 
-with tf.Session() as sess :
+with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as sess :
     sess.run(init)
     
     for epoch in range(num_of_epochs):
@@ -128,9 +121,9 @@ plt.clf()
 for loss, opt_name in zip(losses, ['ASGD','SGD']):
     plt.plot(loss[::5], '+-', alpha=.5, label=opt_name)
 plt.legend()
-#plt.savefig("../../tflab/plots/logreg_comparison1.png")
+plt.savefig("././tflab/plots/logreg_comparison1.png")
 
-plt.savefig("D:/BecomingADS/tflab/plots/logreg_comparisonzz.png")
+
 
 
 
