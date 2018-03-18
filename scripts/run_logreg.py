@@ -97,7 +97,7 @@ losses = []
 with tf.Session() as sess:
     for i, opt in enumerate(opts):
         print(opt_names[i])
-        reg = FeedForwardSMRegression([784, 10], nonlinearities=lambda x: tf.exp(x)/tf.reduce_sum(tf.exp(x)))
+        reg = FeedForwardSMRegression([n_features, n_classes], nonlinearities=lambda x: tf.exp(x)/tf.reduce_sum(tf.exp(x)))
         loss = reg.train(sess, train_x, train_y, minibatch_size=100,
                          steps=steps, optimizer=opts[i])
         losses.append(loss)

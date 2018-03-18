@@ -40,7 +40,7 @@ class FeedForward(object):
         return h
 
     def transform(self, session, X):
-        X_ = tf.placeholder(tf.float32, (None, self.sizes[0]))
+        X_ = tf.placeholder(tf.float32, (None, self.sizes[0]),name="transform:x_")
         Y_hat_ = self.transform_(X_)
         return session.run(Y_hat_, feed_dict={X_: X})
 
@@ -178,6 +178,38 @@ class FeedForwardSMRegression(FeedForward):
             batch_X = X[i_batch:i_batch + minibatch_size]
             batch_Y = Y[i_batch:i_batch + minibatch_size]
             train_val, loss_val = sess.run([train_, loss_], feed_dict={X_: batch_X, Y_: batch_Y})
+            losses.append(loss_val)
+            if step % 500 == 0:
+                print("Step {} of {}, logloss {}".format(step, steps, loss_val))
+        return losses
+
+    
+class FeedForwardANN(FeedForward):
+    def loss_(self, X_, Y_):
+        Y_hat_ = self.transform_(X_)
+        return crossentropy( Y_,Y_hat_)
+
+    def train(self, sess, X, Y,
+              steps=10000, minibatch_size=200,
+              optimizer=tf.train.RMSPropOptimizer(learning_rate=.001)):
+        X_ = tf.placeholder(tf.float32, (None, self.sizes[0]),"ANNF_X")
+        Y_ = tf.placeholder(tf.float32, (None, self.sizes[-1]),"ANNF_Y")
+        
+        loss_ = self.loss_(X_, Y_)
+        train_ = self.train_(loss_, optimizer)
+        
+        sess.run(tf.global_variables_initializer())
+        
+        
+        losses = []
+        for step in range(steps):
+            n_batch = X.shape[0] // minibatch_size + (X.shape[0] % minibatch_size != 0)
+            i_batch = (step % n_batch) * minibatch_size
+            batch_X = X[i_batch:i_batch + minibatch_size]
+            batch_Y = Y[i_batch:i_batch + minibatch_size]
+           
+            train_val, loss_val = sess.run([train_, loss_], feed_dict={X_: batch_X, Y_: batch_Y})
+            
             losses.append(loss_val)
             if step % 500 == 0:
                 print("Step {} of {}, logloss {}".format(step, steps, loss_val))

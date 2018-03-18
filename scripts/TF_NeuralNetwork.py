@@ -3,6 +3,9 @@
 import pandas as pd
 import numpy as np
 import tensorflow as tf
+
+import time
+start_time=time.clock()
 def getdatafromdisk(trainfile, testfile):
 
     train_raw=pd.read_csv(trainfile)
@@ -28,10 +31,10 @@ def preparedatafornn():
     test_Labels=return1Hot(test_Labels)
     return train_Data, train_Labels, test_Data, test_Labels
 
-def prepareANN(X,weights,biases,keep_prob):
+def prepareANN(X,weights,biases):
     layer_1 = tf.add(tf.matmul(X, weights['h1']), biases['b1'])
     layer_1 = tf.nn.relu(layer_1)
-    layer_1 = tf.nn.dropout(layer_1, keep_prob)
+#    layer_1 = tf.nn.dropout(layer_1, keep_prob)
     out_layer = tf.matmul(layer_1, weights['out']) + biases['out']
     return out_layer
 
@@ -52,20 +55,20 @@ biases = {
 }
 
 
-keep_prob = tf.placeholder("float")
+#keep_prob = tf.placeholder("float")
 
-training_epochs = 1000
-display_step = 50
+training_epochs = 5000
+display_step = 500
 batch_size = 200
 
 x = tf.placeholder("float", [None, n_input])
 y = tf.placeholder("float", [None, n_classes])
 
-predictions = prepareANN(x, weights, biases, keep_prob)
+predictions = prepareANN(x, weights, biases)
 cost=tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=predictions,labels=y))
 
-optimizer=tf.train.AdamOptimizer(learning_rate=0.001).minimize(cost)
-
+optimizer=tf.train.GradientDescentOptimizer(learning_rate=0.001).minimize(cost)
+np.random.seed(1234)
 with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as sess:
     sess.run(tf.global_variables_initializer())
     
@@ -79,8 +82,8 @@ with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as sess:
             _, c = sess.run([optimizer, cost], 
                             feed_dict={
                                 x: batch_x, 
-                                y: batch_y, 
-                                keep_prob: 0.8
+                                y: batch_y
+                                
                             })
             avg_cost += c / total_batch
         if epoch % display_step == 0:
@@ -89,6 +92,8 @@ with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as sess:
 
     print("Optimization Finished!")
 
-    correct_prediction = tf.equal(tf.argmax(predictions, 1), tf.argmax(y, 1))
-    accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
-    print("Accuracy:", accuracy.eval({x: test_Data, y: test_Labels, keep_prob: 1.0}))
+#    correct_prediction = tf.equal(tf.argmax(predictions, 1), tf.argmax(y, 1))
+#    accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
+#    print("Accuracy:", accuracy.eval({x: test_Data, y: test_Labels}))
+print('Total Time Taken = :')
+print(time.clock() - start_time)
