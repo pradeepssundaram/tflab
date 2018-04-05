@@ -9,7 +9,7 @@ from __future__ import print_function
 import tensorflow as tf
 import numpy as np
 from cost_functions import mse, mmd_squared, gaussian, multiscale_gaussian,crossentropy
-
+import os
 
 class FeedForward(object):
     def _parse_list_arg(self, arg, size):
@@ -162,24 +162,47 @@ class FeedForwardSMRegression(FeedForward):
 
     def train(self, sess, X, Y,
               steps=10000, minibatch_size=200,
-              optimizer=tf.train.RMSPropOptimizer(learning_rate=.001)):
+              optimizer=tf.train.RMSPropOptimizer(learning_rate=.001),optimizer_name="SGD"):
+
         X_ = tf.placeholder(tf.float32, (None, self.sizes[0]),"FeedForwdRegression_X")
         Y_ = tf.placeholder(tf.float32, (None, self.sizes[-1]),"FeedForwdRegression_Y")
         
         loss_ = self.loss_(X_, Y_)
         train_ = self.train_(loss_, optimizer)
 
+        summary_op = tf.summary.merge_all()
+
         sess.run(tf.global_variables_initializer())
+        sess.run(tf.local_variables_initializer())
+        logs_path = "D:/BecomingADS/TflabPyCharm/Logs/ClassLogs3"
+        newdir=os.path.join(logs_path,optimizer_name)
+        if not os.path.exists(newdir):
+            os.makedirs(newdir)
+
+        writer = tf.summary.FileWriter(newdir, graph=tf.get_default_graph())
         # Fit all training data
         losses = []
+        loss_val = []
         for step in range(steps):
             n_batch = X.shape[0] // minibatch_size + (X.shape[0] % minibatch_size != 0)
-            i_batch = (step % n_batch) * minibatch_size
-            batch_X = X[i_batch:i_batch + minibatch_size]
-            batch_Y = Y[i_batch:i_batch + minibatch_size]
-            train_val, loss_val = sess.run([train_, loss_], feed_dict={X_: batch_X, Y_: batch_Y})
+            for batch in range(n_batch):
+                if batch != (n_batch-1):
+                    batch_X = X[batch:batch + minibatch_size-1]
+                    batch_Y = Y[batch:batch + minibatch_size-1]
+                else:
+                    batch_X = X[batch:]
+                    batch_Y = Y[batch:]
+                train_val, c, summary = sess.run([train_, loss_,summary_op], feed_dict={X_: batch_X, Y_: batch_Y})
+                loss_val += c/n_batch
+                writer.add_summary(summary,step)
+
+            # i_batch = (step % n_batch) * minibatch_size
+            # batch_X = X[i_batch:i_batch + minibatch_size]
+            # batch_Y = Y[i_batch:i_batch + minibatch_size]
+            #train_val, loss_val, summary = sess.run([train_, loss_, summary_op], feed_dict={X_: batch_X, Y_: batch_Y})
             losses.append(loss_val)
-            if step % 500 == 0:
+
+            if step % 50 == 0:
                 print("Step {} of {}, logloss {}".format(step, steps, loss_val))
         return losses
 
@@ -204,11 +227,21 @@ class FeedForwardANN(FeedForward):
         losses = []
         for step in range(steps):
             n_batch = X.shape[0] // minibatch_size + (X.shape[0] % minibatch_size != 0)
-            i_batch = (step % n_batch) * minibatch_size
-            batch_X = X[i_batch:i_batch + minibatch_size]
-            batch_Y = Y[i_batch:i_batch + minibatch_size]
+            loss_val = 0
+            for batch in range(n_batch):
+                if batch != (n_batch-1):
+                    batch_X = X[batch:batch + minibatch_size-1]
+                    batch_Y = Y[batch:batch + minibatch_size-1]
+                else:
+                    batch_X = X[batch:]
+                    batch_Y = Y[batch:]
+                train_val, c = sess.run([train_, loss_], feed_dict={X_: batch_X, Y_: batch_Y})
+                loss_val += c/n_batch
+            #i_batch = (step % n_batch) * minibatch_size
+            #batch_X = X[i_batch:i_batch + minibatch_size]
+            #batch_Y = Y[i_batch:i_batch + minibatch_size]
            
-            train_val, loss_val = sess.run([train_, loss_], feed_dict={X_: batch_X, Y_: batch_Y})
+
             
             losses.append(loss_val)
             if step % 500 == 0:
