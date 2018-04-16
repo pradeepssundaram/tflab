@@ -45,7 +45,8 @@ class FeedForward(object):
         return session.run(Y_hat_, feed_dict={X_: X})
 
     def train_(self, loss, optimizer):
-        return optimizer.minimize(loss)
+        global_step = tf.Variable(0, name='global_step', trainable=False)
+        return optimizer.minimize(loss=loss, global_step=global_step)
 
     def _gen_paired_minibatch(self, batch_size, i, size_limit):
         indicies = range(i * batch_size, (i + 1) * batch_size)
@@ -73,6 +74,7 @@ class FeedForwardRegression(FeedForward):
         sess.run(tf.global_variables_initializer())
         # Fit all training data
         losses = []
+
         for step in range(steps):
             n_batch = X.shape[0] // minibatch_size + (X.shape[0] % minibatch_size != 0)
             i_batch = (step % n_batch) * minibatch_size
@@ -169,6 +171,7 @@ class FeedForwardSMRegression(FeedForward):
         
         loss_ = self.loss_(X_, Y_)
         train_ = self.train_(loss_, optimizer)
+        global_step = tf.Variable(0, name='global_step', trainable=False)
 
         summary_op = tf.summary.merge_all()
 
@@ -179,10 +182,12 @@ class FeedForwardSMRegression(FeedForward):
         if not os.path.exists(newdir):
             os.makedirs(newdir)
 
+        global_step = tf.Variable(0, name='global_step', trainable=False)
         writer = tf.summary.FileWriter(newdir, graph=tf.get_default_graph())
         # Fit all training data
         losses = []
         loss_val = []
+        stepctr = 0
         for step in range(steps):
             n_batch = X.shape[0] // minibatch_size + (X.shape[0] % minibatch_size != 0)
             for batch in range(n_batch):
@@ -194,7 +199,10 @@ class FeedForwardSMRegression(FeedForward):
                     batch_Y = Y[batch:]
                 train_val, c, summary = sess.run([train_, loss_,summary_op], feed_dict={X_: batch_X, Y_: batch_Y})
                 loss_val += c/n_batch
-                writer.add_summary(summary,step)
+                stepctr = stepctr+1
+                writer.add_summary(summary, stepctr)
+
+
 
             # i_batch = (step % n_batch) * minibatch_size
             # batch_X = X[i_batch:i_batch + minibatch_size]

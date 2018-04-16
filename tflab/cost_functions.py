@@ -9,9 +9,10 @@ def mse(X, Y):
 def crossentropy(Y,Yhat):
     with tf.name_scope('cost_function'):
         cost_function = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=Y,logits=Yhat))
-        streaming_cost_mean, streaming_cost_update = tf.contrib.metrics.streaming_mean(cost_function)
-        streaming_cost_scalar = tf.summary.scalar('streaming_cost', streaming_cost_update)
+        #streaming_cost_mean, streaming_cost_update = tf.contrib.metrics.streaming_mean(cost_function)
+        #streaming_cost_scalar = tf.summary.scalar('streaming_cost', streaming_cost_update)
 
+        cost_scalar = tf.summary.scalar("cost_function",cost_function)
         return cost_function
 
 # calculate the squared distance between x and y

@@ -49,6 +49,9 @@ class ASGradientDescentOptimizer(optimizer.Optimizer):
         lr = self.get_slot(var, "learning_rate")
         scale_factor = tf.pow(self._scale_tensor, tf.sign(grad * previous_grad))
         lr_update = lr.assign(lr * scale_factor)
+        #streaming_lr_mean, streaming_lr_update = tf.contrib.metrics.streaming_mean(lr_update)
+        #streaming_lr_scalar = tf.summary.scalar('lr_cost', streaming_lr_update)
+        lr_scalar = tf.summary.scalar("learning rate/{}".format(var), tf.reduce_mean( lr * scale_factor))
         with tf.control_dependencies([lr_update]):
             previous_grad_update = previous_grad.assign(grad)
             with tf.control_dependencies([previous_grad_update]):
